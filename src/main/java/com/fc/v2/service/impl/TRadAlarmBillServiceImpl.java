@@ -11,10 +11,8 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fc.v2.common.support.ConvertUtil;
 import com.fc.v2.mapper.auto.TRadAlarmBillMapper;
-import com.fc.v2.mapper.auto.TRadDoseRuleMapper;
 import com.fc.v2.mapper.auto.TRadSiteMapper;
 import com.fc.v2.model.auto.TRadAlarmBill;
-import com.fc.v2.model.auto.TRadDoseRule;
 import com.fc.v2.model.auto.TRadSite;
 import com.fc.v2.service.ITRadAlarmBillService;
 import com.fc.v2.util.StringUtils;
@@ -29,9 +27,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TRadAlarmBillServiceImpl extends ServiceImpl<TRadAlarmBillMapper, TRadAlarmBill> implements ITRadAlarmBillService {
-
-    @Autowired
-    private TRadDoseRuleMapper radDoseRuleMapper;
 
     @Autowired
     private TRadSiteMapper radSiteMapper;
@@ -58,18 +53,15 @@ public class TRadAlarmBillServiceImpl extends ServiceImpl<TRadAlarmBillMapper, T
         }
 
         record.setCreateBy(record.getBillNo());
-        // 判档阈值来自「剂量率判定规则」（t_rad_dose_rule 的 th1_max/th2_max/th3_max），
-        // 取启用且未删除、优先级最高的一条；无可用法则阈值缺失，直接判 0 档。
-        TRadDoseRule bandArch = radDoseRuleMapper.selectOne(new QueryWrapper<TRadDoseRule>()
-                .eq("status", 0).eq("del_flag", 0).orderByDesc("priority").last("limit 1"));
-        if (bandArch == null) {
-            return 0;
-        }
         TRadSite refArch = radSiteMapper.selectOne(new QueryWrapper<TRadSite>()
                 .eq("id", record.getSiteId()).eq("del_flag", 0));
-        if (refArch == null || (refArch.getStatus() != null && refArch.getStatus() == 1)) {
+        if (refArch == null) {
             return 0;
         }
+        if (refArch.getStatus() != null && refArch.getStatus() == 1) {
+            return 0;
+        }
+        record.setSiteNo(refArch.getSiteNo());
         if (StringUtils.isNotEmpty(record.getBillNo())) {
             Integer dupCnt = this.baseMapper.selectCount(new QueryWrapper<TRadAlarmBill>()
                     .eq("bill_no", record.getBillNo()).eq("del_flag", 0));
@@ -77,9 +69,10 @@ public class TRadAlarmBillServiceImpl extends ServiceImpl<TRadAlarmBillMapper, T
                 return 0;
             }
         }
+        TRadSite bandArch = radSiteMapper.selectById(record.getSiteId());
         BigDecimal bandVal = record.getQty();
         int bandLevel = 0;
-        if (bandVal != null) {
+        if (bandVal != null && bandArch != null) {
             if (bandVal.compareTo(bandArch.getTh1Max()) <= 0) {
                 bandLevel = 1;
             } else if (bandVal.compareTo(bandArch.getTh2Max()) <= 0) {
@@ -90,7 +83,7 @@ public class TRadAlarmBillServiceImpl extends ServiceImpl<TRadAlarmBillMapper, T
                 bandLevel = 4;
             }
         }
-        record.setAlarmLevel(java.math.BigDecimal.valueOf(bandLevel));
+        record.setAlarmLevel(bandLevel);
 
         record.setDelFlag(0);
         return this.baseMapper.insert(record);

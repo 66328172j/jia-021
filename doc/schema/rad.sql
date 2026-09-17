@@ -6,8 +6,9 @@ CREATE TABLE IF NOT EXISTS t_rad_alarm_bill (
   id bigint NOT NULL COMMENT '主键',
   bill_no varchar(64) DEFAULT NULL COMMENT '预警单号',
   site_id int DEFAULT NULL COMMENT '所属场所',
+  site_no varchar(128) DEFAULT NULL COMMENT '站点编号',
   qty decimal(12,2) DEFAULT NULL COMMENT '剂量率(μSv/h)',
-  alarm_level decimal(14,4) DEFAULT NULL COMMENT '预警档位',
+  alarm_level int DEFAULT NULL COMMENT '预警档位',
   status int DEFAULT NULL COMMENT '状态 0待处理 1已处理 2已办结',
   del_flag int DEFAULT '0' COMMENT '删除标记 0正常 1删除',
   create_by varchar(64) DEFAULT NULL COMMENT '创建者',
@@ -93,6 +94,9 @@ CREATE TABLE IF NOT EXISTS t_rad_site (
   site_name varchar(128) DEFAULT NULL COMMENT '场所名称',
   site_type varchar(128) DEFAULT NULL COMMENT '场所类型',
   area_name varchar(128) DEFAULT NULL COMMENT '所属分区',
+  th1_max decimal(8,2) DEFAULT NULL COMMENT '第一档上限',
+  th2_max decimal(8,2) DEFAULT NULL COMMENT '第二档上限',
+  th3_max decimal(8,2) DEFAULT NULL COMMENT '第三档上限',
   status int DEFAULT NULL COMMENT '档案状态 0在用 1停用',
   del_flag int DEFAULT '0' COMMENT '删除标记 0正常 1删除',
   create_by varchar(64) DEFAULT NULL COMMENT '创建者',
@@ -117,19 +121,3 @@ CREATE TABLE IF NOT EXISTS t_rad_source_task (
   remark varchar(500) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='放射源出入库任务条目';
-
-CREATE TABLE IF NOT EXISTS t_rad_dose_summary (
-  id bigint NOT NULL COMMENT '主键',
-  period varchar(7) DEFAULT NULL COMMENT '统计月份 yyyy-MM',
-  site_id int DEFAULT NULL COMMENT '场所/机房',
-  total_qty decimal(14,2) DEFAULT NULL COMMENT '剂量合计(mSv)',
-  row_count int DEFAULT NULL COMMENT '参与汇总的明细行数',
-  status int DEFAULT NULL COMMENT '汇总状态 0待生成 1已生成',
-  del_flag int DEFAULT '0' COMMENT '删除标记 0正常 1删除',
-  create_by varchar(64) DEFAULT NULL COMMENT '创建人',
-  create_time datetime DEFAULT NULL COMMENT '创建时间',
-  update_by varchar(64) DEFAULT NULL COMMENT '更新人',
-  update_time datetime DEFAULT NULL COMMENT '更新时间',
-  remark varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='场所剂量按月汇总';

@@ -42,6 +42,11 @@ public class TRadAlarmBill implements Serializable {
     @ApiModelProperty(value = "所属场所")
     private Integer siteId;
 
+    /** 站点编号 */
+    @TableField("site_no")
+    @ApiModelProperty(value = "站点编号")
+    private String siteNo;
+
     /** 剂量率(μSv/h) */
     @TableField("qty")
     @ApiModelProperty(value = "剂量率(μSv/h)")
@@ -50,7 +55,7 @@ public class TRadAlarmBill implements Serializable {
     /** 预警档位 */
     @TableField("alarm_level")
     @ApiModelProperty(value = "预警档位")
-    private BigDecimal alarmLevel;
+    private Integer alarmLevel;
 
     /** 状态 0待处理 1已处理 2已办结 */
     @TableField("status")
@@ -113,6 +118,14 @@ public class TRadAlarmBill implements Serializable {
         this.siteId = siteId;
     }
 
+    public String getSiteNo() {
+        return siteNo;
+    }
+
+    public void setSiteNo(String siteNo) {
+        this.siteNo = siteNo;
+    }
+
     public BigDecimal getQty() {
         return qty;
     }
@@ -121,11 +134,11 @@ public class TRadAlarmBill implements Serializable {
         this.qty = qty;
     }
 
-    public BigDecimal getAlarmLevel() {
+    public Integer getAlarmLevel() {
         return alarmLevel;
     }
 
-    public void setAlarmLevel(BigDecimal alarmLevel) {
+    public void setAlarmLevel(Integer alarmLevel) {
         this.alarmLevel = alarmLevel;
     }
 
